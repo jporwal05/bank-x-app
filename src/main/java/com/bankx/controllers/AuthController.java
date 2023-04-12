@@ -1,12 +1,16 @@
 package com.bankx.controllers;
 
+import com.bankx.entity.CurrentAccount;
+import com.bankx.entity.SavingsAccount;
 import com.bankx.entity.User;
 import com.bankx.entity.UserCredentials;
+import com.bankx.models.dto.AccountDetailsResponse;
 import com.bankx.models.dto.AuthenticationResponse;
 import com.bankx.models.dto.UserRegistrationRequest;
-import com.bankx.repository.UserRepository;
 import com.bankx.security.JwtTokenUtil;
 import com.bankx.security.JwtUserDetailsService;
+import com.bankx.service.AccountService;
+import com.bankx.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -14,6 +18,8 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.ArrayList;
 
 @RestController
 @RequestMapping("/api/auth")
@@ -24,15 +30,22 @@ public class AuthController {
     private final JwtTokenUtil jwtTokenUtil;
     private final PasswordEncoder passwordEncoder;
 
-    private final UserRepository userRepository;
+    private final UserService userService;
+
+    private final AccountService accountService;
 
     @Autowired
-    public AuthController(AuthenticationManager authenticationManager, JwtUserDetailsService userDetailsService, JwtTokenUtil jwtTokenUtil, PasswordEncoder passwordEncoder, UserRepository userRepository) {
+    public AuthController(AuthenticationManager authenticationManager,
+                          JwtUserDetailsService userDetailsService,
+                          JwtTokenUtil jwtTokenUtil,
+                          PasswordEncoder passwordEncoder,
+                          UserService userService, AccountService accountService) {
         this.authenticationManager = authenticationManager;
         this.userDetailsService = userDetailsService;
         this.jwtTokenUtil = jwtTokenUtil;
         this.passwordEncoder = passwordEncoder;
-        this.userRepository = userRepository;
+        this.userService = userService;
+        this.accountService = accountService;
     }
 
     @PostMapping("/register")
@@ -45,12 +58,23 @@ public class AuthController {
                         .username(userRegistrationRequest.getUsername())
                         .password(passwordEncoder.encode(userRegistrationRequest.getPassword()))
                         .build())
+                .accounts(new ArrayList<>())
                 .build();
-        userRepository.save(user);
+
+        userService.save(user);
+        CurrentAccount currentAccount = accountService.createCurrentAccount(user);
+        SavingsAccount savingsAccount = accountService.createSavingsAccount(user);
+        user.addAccount(currentAccount);
+        user.addAccount(savingsAccount);
+
         UserDetails userDetails = userDetailsService.loadUserByUsername(user.getUserCredentials().getUsername());
         String token = jwtTokenUtil.generateToken(userDetails);
-        AuthenticationResponse authenticationResponse = new AuthenticationResponse(token);
-        return ResponseEntity.ok(authenticationResponse);
+        AccountDetailsResponse accountDetailsResponse = AccountDetailsResponse.builder()
+                .token(token)
+                .currentAccount(currentAccount)
+                .savingsAccount(savingsAccount)
+                .build();
+        return ResponseEntity.ok(accountDetailsResponse);
     }
 
     @PostMapping("/token")

@@ -1,9 +1,14 @@
 package com.bankx.security;
 
 import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.MalformedJwtException;
 import io.jsonwebtoken.SignatureAlgorithm;
+import io.jsonwebtoken.UnsupportedJwtException;
 import io.jsonwebtoken.security.Keys;
+import io.jsonwebtoken.security.SignatureException;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
@@ -15,6 +20,7 @@ import java.util.Map;
 import java.util.function.Function;
 
 @Component
+@Slf4j
 public class JwtTokenUtil {
 
     private final Key SECRET_KEY;
@@ -41,10 +47,27 @@ public class JwtTokenUtil {
                 .compact();
     }
 
-    public boolean validateToken(String token, UserDetails userDetails) {
-        String username = extractUsername(token);
-        return (username.equals(userDetails.getUsername()) && !isTokenExpired(token));
+    public boolean validateToken(String token) {
+        try {
+            Jwts.parserBuilder()
+                    .setSigningKey(SECRET_KEY)
+                    .build()
+                    .parseClaimsJws(token);
+            return true;
+        } catch (SignatureException e) {
+            log.error("Invalid JWT signature", e);
+        } catch (MalformedJwtException e) {
+            log.error("Invalid JWT token", e);
+        } catch (ExpiredJwtException e) {
+            log.error("Expired JWT token", e);
+        } catch (UnsupportedJwtException e) {
+            log.error("Unsupported JWT token", e);
+        } catch (IllegalArgumentException e) {
+            log.error("JWT claims string is empty", e);
+        }
+        return false;
     }
+
 
     public String extractUsername(String token) {
         return extractClaim(token, Claims::getSubject);

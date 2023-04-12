@@ -2,6 +2,7 @@ package com.bankx.security;
 
 import com.bankx.entity.UserCredentials;
 import com.bankx.repository.UserCredentialsRepository;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -10,15 +11,14 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 @Service
+@Slf4j
 public class JwtUserDetailsService implements UserDetailsService {
 
     private final UserCredentialsRepository userCredentialsRepository;
-    private final PasswordEncoder passwordEncoder;
 
     @Autowired
-    public JwtUserDetailsService(UserCredentialsRepository userCredentialsRepository, PasswordEncoder passwordEncoder) {
+    public JwtUserDetailsService(UserCredentialsRepository userCredentialsRepository) {
         this.userCredentialsRepository = userCredentialsRepository;
-        this.passwordEncoder = passwordEncoder;
     }
 
     @Override
@@ -29,12 +29,8 @@ public class JwtUserDetailsService implements UserDetailsService {
             throw new UsernameNotFoundException("User not found with username: " + username);
         }
 
-        return new JwtUserDetails(userCredentials.getUsername(), userCredentials.getPassword());
-    }
+        log.info("User found with username: {}", username);
 
-    public void saveUserCredentials(UserCredentials userCredentials) {
-        String encodedPassword = passwordEncoder.encode(userCredentials.getPassword());
-        userCredentials.setPassword(encodedPassword);
-        userCredentialsRepository.save(userCredentials);
+        return new JwtUserDetails(userCredentials.getUsername(), userCredentials.getPassword());
     }
 }
