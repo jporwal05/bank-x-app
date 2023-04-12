@@ -33,7 +33,7 @@ public class JwtAuthenticationFilter extends AbstractAuthenticationProcessingFil
                                    AuthenticationSuccessHandler successHandler,
                                    AuthenticationFailureHandler failureHandler,
                                    AuthenticationManager authenticationManager) {
-        super(new NegatedRequestMatcher(new AntPathRequestMatcher("/api/auth/register")));
+        super(new NegatedRequestMatcher(new AntPathRequestMatcher("/api/auth/**")));
         this.jwtTokenUtil = jwtTokenUtil;
         this.userDetailsService = userDetailsService;
         setAuthenticationSuccessHandler(successHandler);

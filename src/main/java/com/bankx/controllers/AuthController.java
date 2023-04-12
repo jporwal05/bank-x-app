@@ -53,8 +53,8 @@ public class AuthController {
         return ResponseEntity.ok(authenticationResponse);
     }
 
-    @PostMapping("/authenticate")
-    public ResponseEntity<?> authenticateUser(@RequestBody UserRegistrationRequest userRegistrationRequest) throws Exception {
+    @PostMapping("/token")
+    public ResponseEntity<?> generateToken(@RequestBody UserRegistrationRequest userRegistrationRequest) throws Exception {
         authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(userRegistrationRequest.getUsername(), userRegistrationRequest.getPassword()));
         UserDetails userDetails = userDetailsService.loadUserByUsername(userRegistrationRequest.getUsername());
         String token = jwtTokenUtil.generateToken(userDetails);
