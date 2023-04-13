@@ -1,6 +1,7 @@
 package com.bankx.repository;
 
 import com.bankx.entity.Account;
+import com.bankx.entity.AccountType;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
@@ -13,4 +14,6 @@ public interface AccountRepository extends JpaRepository<Account, Long> {
     Optional<Account> findByIdAndUserId(Long id, Long userId);
 
     List<Account> findByUserId(Long userId);
+
+    Account findByIdAndAccountType(Long accountId, AccountType accountType);
 }

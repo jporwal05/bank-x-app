@@ -1,5 +1,8 @@
 package com.bankx.controllers;
 
+import com.bankx.entity.Account;
+import com.bankx.entity.AccountType;
+import com.bankx.models.dto.AccountDetailsResponse;
 import com.bankx.models.dto.TransferRequest;
 import com.bankx.service.AccountService;
 import lombok.extern.slf4j.Slf4j;
@@ -9,7 +12,10 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+
+import java.math.BigDecimal;
 
 @RestController
 @RequestMapping("/api/accounts")
@@ -24,13 +30,33 @@ public class AccountController {
     }
 
     @PostMapping("/{fromAccountId}/transfer/{toAccountId}")
-    public ResponseEntity<?> transferFunds(
+    public ResponseEntity<AccountDetailsResponse> transferFunds(
             @PathVariable("fromAccountId") Long fromAccountId,
             @PathVariable("toAccountId") Long toAccountId,
             @RequestBody TransferRequest transferRequest
     ) {
         log.info("Transfer request received from {} to {} for amount {}", fromAccountId, toAccountId, transferRequest.getAmount());
-        accountService.transferFunds(fromAccountId, toAccountId, transferRequest.getAmount());
-        return ResponseEntity.ok("Transfer completed successfully");
+        AccountDetailsResponse accountDetailsResponse = accountService.transferFunds(fromAccountId, toAccountId, transferRequest.getAmount());
+        return ResponseEntity.ok(accountDetailsResponse);
+    }
+
+    @PostMapping("/{accountId}/{accountType}/deposit")
+    public ResponseEntity<Account> deposit(
+            @PathVariable("accountId") Long accountId,
+            @PathVariable("accountType") AccountType accountType,
+            @RequestParam("amount") Double amount
+    ) {
+        Account updatedAccount = accountService.deposit(accountId, BigDecimal.valueOf(amount), accountType);
+        return ResponseEntity.ok(updatedAccount);
+    }
+
+    @PostMapping("/{accountId}/{accountType}/withdraw")
+    public ResponseEntity<Account> withdraw(
+            @PathVariable("accountId") Long accountId,
+            @PathVariable("accountType") AccountType accountType,
+            @RequestParam("amount") Double amount
+    ) {
+        Account updatedAccount = accountService.withdraw(accountId, BigDecimal.valueOf(amount), accountType);
+        return ResponseEntity.ok(updatedAccount);
     }
 }
