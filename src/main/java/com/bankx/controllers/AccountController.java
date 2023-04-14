@@ -2,6 +2,7 @@ package com.bankx.controllers;
 
 import com.bankx.entity.Account;
 import com.bankx.entity.AccountType;
+import com.bankx.entity.Transaction;
 import com.bankx.models.dto.AccountDetailsResponse;
 import com.bankx.models.dto.TransferRequest;
 import com.bankx.service.AccountService;
@@ -41,22 +42,22 @@ public class AccountController {
     }
 
     @PostMapping("/{accountId}/{accountType}/deposit")
-    public ResponseEntity<Account> deposit(
+    public ResponseEntity<Transaction> deposit(
             @PathVariable("accountId") Long accountId,
             @PathVariable("accountType") AccountType accountType,
             @RequestParam("amount") Double amount
     ) {
-        Account updatedAccount = accountService.deposit(accountId, BigDecimal.valueOf(amount), accountType);
-        return ResponseEntity.ok(updatedAccount);
+        Transaction incomingTransaction = accountService.deposit(accountId, BigDecimal.valueOf(amount), accountType);
+        return ResponseEntity.ok(incomingTransaction);
     }
 
     @PostMapping("/{accountId}/{accountType}/withdraw")
-    public ResponseEntity<Account> withdraw(
+    public ResponseEntity<Transaction> withdraw(
             @PathVariable("accountId") Long accountId,
             @PathVariable("accountType") AccountType accountType,
             @RequestParam("amount") Double amount
     ) {
-        Account updatedAccount = accountService.withdraw(accountId, BigDecimal.valueOf(amount), accountType);
-        return ResponseEntity.ok(updatedAccount);
+        Transaction outgoingTransaction = accountService.withdraw(accountId, BigDecimal.valueOf(amount), accountType);
+        return ResponseEntity.ok(outgoingTransaction);
     }
 }

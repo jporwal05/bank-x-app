@@ -42,5 +42,9 @@ public class Transaction {
 
     private BigDecimal amount;
 
+
+
+    private BigDecimal calculatedAmount;
+
     private BigDecimal transactionFee;
 }

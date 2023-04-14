@@ -8,6 +8,7 @@ import com.bankx.entity.Transaction;
 import com.bankx.entity.TransactionType;
 import com.bankx.entity.User;
 import com.bankx.models.dto.AccountDetailsResponse;
+import com.bankx.models.dto.TransactionRequest;
 import com.bankx.repository.AccountRepository;
 import com.bankx.repository.TransactionRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,6 +16,8 @@ import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Service
 public class AccountService {
@@ -58,14 +61,16 @@ public class AccountService {
             Transaction outgoingTransaction = Transaction.builder()
                     .account(fromAccount)
                     .type(TransactionType.WITHDRAWAL)
-                    .amount(withdrawnAmount)
+                    .amount(amount)
+                    .calculatedAmount(withdrawnAmount)
                     .dateTime(LocalDateTime.now())
                     .transactionFee(fromAccount.getTransactionFee())
                     .build();
             Transaction incomingTransaction = Transaction.builder()
                     .account(toAccount)
                     .type(TransactionType.DEPOSIT)
-                    .amount(depositedAmount)
+                    .amount(amount)
+                    .calculatedAmount(depositedAmount)
                     .dateTime(LocalDateTime.now())
                     .transactionFee(fromAccount.getTransactionFee())
                     .build();
@@ -85,36 +90,67 @@ public class AccountService {
         }
     }
 
-    public Account deposit(Long accountId, BigDecimal amount, AccountType accountType) {
+    // overload the deposit method to take a datetime parameter
+    public Transaction deposit(Long accountId, BigDecimal amount, AccountType accountType, LocalDateTime dateTime) {
         Account account = accountRepository.findByIdAndAccountType(accountId, accountType);
         BigDecimal depositedAmount = account.deposit(amount);
         accountRepository.save(account);
         Transaction incomingTransaction = Transaction.builder()
                 .account(account)
                 .type(TransactionType.DEPOSIT)
-                .amount(depositedAmount)
-                .dateTime(LocalDateTime.now())
+                .amount(amount)
+                .calculatedAmount(depositedAmount)
+                .dateTime(dateTime)
                 .transactionFee(account.getTransactionFee())
                 .build();
         transactionRepository.save(incomingTransaction);
         notificationService.sendTransactionNotification(account.getUser(), incomingTransaction);
-        return account;
+        return incomingTransaction;
     }
 
-    public Account withdraw(Long accountId, BigDecimal amount, AccountType accountType) {
+    public Transaction deposit(Long accountId, BigDecimal amount, AccountType accountType) {
+        return deposit(accountId, amount, accountType, LocalDateTime.now());
+    }
+
+    // overload the withdraw method to take a datetime parameter
+    public Transaction withdraw(Long accountId, BigDecimal amount, AccountType accountType, LocalDateTime dateTime) {
         Account account = accountRepository.findByIdAndAccountType(accountId, accountType);
         BigDecimal withdrawnAmount = account.withdraw(amount);
         accountRepository.save(account);
         Transaction outgoingTransaction = Transaction.builder()
                 .account(account)
                 .type(TransactionType.WITHDRAWAL)
-                .amount(withdrawnAmount)
-                .dateTime(LocalDateTime.now())
+                .amount(amount)
+                .calculatedAmount(withdrawnAmount)
+                .dateTime(dateTime)
                 .transactionFee(account.getTransactionFee())
                 .build();
         transactionRepository.save(outgoingTransaction);
         notificationService.sendTransactionNotification(account.getUser(), outgoingTransaction);
-        return account;
+        return outgoingTransaction;
     }
 
+    public Transaction withdraw(Long accountId, BigDecimal amount, AccountType accountType) {
+        return withdraw(accountId, amount, accountType, LocalDateTime.now());
+    }
+
+    public List<Transaction> processTransactions(List<TransactionRequest> transactions) {
+        List<Transaction> savedTransactions = new ArrayList<>();
+        for (TransactionRequest transaction : transactions) {
+            Long accountId = transaction.getAccountId();
+            AccountType accountType = transaction.getAccountType();
+            if (transaction.getTransactionType() == TransactionType.DEPOSIT) {
+                savedTransactions.add(deposit(accountId, transaction.getAmount(), accountType,
+                        transaction.getDateTime()));
+            } else if (transaction.getTransactionType() == TransactionType.WITHDRAWAL) {
+                savedTransactions.add(withdraw(accountId, transaction.getAmount(), accountType,
+                        transaction.getDateTime()));
+            }
+        }
+        return savedTransactions;
+    }
+
+    public List<Transaction> getAllTransactionsByAccountId(Long accountId) {
+        return transactionRepository.findAllByAccountId(accountId);
+    }
 }
