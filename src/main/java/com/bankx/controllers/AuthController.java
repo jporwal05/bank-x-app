@@ -11,6 +11,7 @@ import com.bankx.security.JwtTokenUtil;
 import com.bankx.security.JwtUserDetailsService;
 import com.bankx.service.AccountService;
 import com.bankx.service.UserService;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -23,6 +24,7 @@ import java.util.ArrayList;
 
 @RestController
 @RequestMapping("/api/auth")
+@Slf4j
 public class AuthController {
 
     private final AuthenticationManager authenticationManager;
@@ -74,6 +76,7 @@ public class AuthController {
                 .currentAccount(currentAccount)
                 .savingsAccount(savingsAccount)
                 .build();
+        log.info("user registered successfully");
         return ResponseEntity.ok(accountDetailsResponse);
     }
 
@@ -83,6 +86,7 @@ public class AuthController {
         UserDetails userDetails = userDetailsService.loadUserByUsername(userRegistrationRequest.getUsername());
         String token = jwtTokenUtil.generateToken(userDetails);
         AuthenticationResponse authenticationResponse = new AuthenticationResponse(token);
+        log.info("token generated successfully");
         return ResponseEntity.ok(authenticationResponse);
     }
 }

@@ -36,7 +36,6 @@ public class AccountController {
             @PathVariable("toAccountId") Long toAccountId,
             @RequestBody TransferRequest transferRequest
     ) {
-        log.info("Transfer request received from {} to {} for amount {}", fromAccountId, toAccountId, transferRequest.getAmount());
         AccountDetailsResponse accountDetailsResponse = accountService.transferFunds(fromAccountId, toAccountId, transferRequest.getAmount());
         return ResponseEntity.ok(accountDetailsResponse);
     }

@@ -12,6 +12,7 @@ import com.bankx.models.dto.AccountDetailsResponse;
 import com.bankx.models.dto.TransactionRequest;
 import com.bankx.repository.AccountRepository;
 import com.bankx.repository.TransactionRepository;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -21,6 +22,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Service
+@Slf4j
 public class AccountService {
 
     private final AccountRepository accountRepository;
@@ -91,7 +93,8 @@ public class AccountService {
                     .savingsAccount((SavingsAccount) (fromAccount.getAccountType().equals(AccountType.SAVINGS) ? fromAccount : toAccount))
                     .build();
         } else {
-            throw new RuntimeException("Savings accounts are not eligible to transfer funds");
+            log.error("savings accounts are not eligible to transfer funds");
+            throw new RuntimeException("savings accounts are not eligible to transfer funds");
         }
     }
 
@@ -164,10 +167,12 @@ public class AccountService {
     }
 
     public List<Transaction> getAllTransactionsByAccountId(Long accountId) {
+        log.info("getting all transactions for account id: {}", accountId);
         return transactionRepository.findAllByAccountId(accountId);
     }
 
     public List<Transaction> getAllTransactionsByCategory(TransactionCategory category) {
+        log.info("getting all transactions for category: {}", category);
         return transactionRepository.findAllByTransactionCategory(category);
     }
 }

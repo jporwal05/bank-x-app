@@ -10,7 +10,11 @@ import org.springframework.stereotype.Service;
 public class NotificationService {
 
     public void sendTransactionNotification(User user, Transaction transaction) {
-        log.info("Transaction notification sent to user {} for transaction {}",
-                user.getId(), transaction.getId());
+        log.info("user: {}, transaction type: {}, amount: {}, account type: {}, transaction category: {}",
+                user.getEmail(),
+                transaction.getType(),
+                transaction.getAmount(),
+                transaction.getAccount().getAccountType(),
+                transaction.getTransactionCategory());
     }
 }

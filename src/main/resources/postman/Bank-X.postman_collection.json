@@ -28,7 +28,7 @@
 				"header": [],
 				"body": {
 					"mode": "raw",
-					"raw": "{\n    \"username\": \"jp0505\",\n    \"password\": \"jp0505\",\n    \"firstName\": \"Jayant\",\n    \"lastName\": \"Porwal\",\n    \"email\": \"jayantporwal05@gmail.com\"\n}",
+					"raw": "{\n    \"username\": \"vh0505\",\n    \"password\": \"vh0505\",\n    \"firstName\": \"Vivek\",\n    \"lastName\": \"Hingorani\",\n    \"email\": \"xyz@gmail.com\"\n}",
 					"options": {
 						"raw": {
 							"language": "json"
@@ -59,7 +59,7 @@
 				"header": [],
 				"body": {
 					"mode": "raw",
-					"raw": "{\n    \"username\": \"jp0505\",\n    \"password\": \"jp0505\",\n    \"firstName\": \"Jayant\",\n    \"lastName\": \"Porwal\",\n    \"email\": \"jayantporwal05@gmail.com\"\n}",
+					"raw": "{\n    \"username\": \"vh0505\",\n    \"password\": \"vh0505\",\n    \"firstName\": \"Vivek\",\n    \"lastName\": \"Hingorani\",\n    \"email\": \"xyz@gmail.com\"\n}",
 					"options": {
 						"raw": {
 							"language": "json"
