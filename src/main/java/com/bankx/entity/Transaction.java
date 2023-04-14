@@ -42,7 +42,10 @@ public class Transaction {
 
     private BigDecimal amount;
 
+    private String reference;
 
+    @Enumerated(EnumType.STRING)
+    private TransactionCategory transactionCategory;
 
     private BigDecimal calculatedAmount;
 

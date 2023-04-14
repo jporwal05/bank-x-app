@@ -1,6 +1,7 @@
 package com.bankx.controllers;
 
 import com.bankx.entity.Transaction;
+import com.bankx.entity.TransactionCategory;
 import com.bankx.models.dto.TransactionRequest;
 import com.bankx.service.AccountService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,9 +33,15 @@ public class TransactionController {
         return ResponseEntity.ok(savedTransactions);
     }
 
-    @GetMapping("/{accountId}")
+    @GetMapping("/accountId/{accountId}")
     public ResponseEntity<List<Transaction>> getTransactionsByAccountId(@PathVariable Long accountId) {
         List<Transaction> transactions = accountService.getAllTransactionsByAccountId(accountId);
+        return ResponseEntity.ok(transactions);
+    }
+
+    @GetMapping("/category/{category}")
+    public ResponseEntity<List<Transaction>> getTransactionsByCategory(@PathVariable TransactionCategory category) {
+        List<Transaction> transactions = accountService.getAllTransactionsByCategory(category);
         return ResponseEntity.ok(transactions);
     }
 }
